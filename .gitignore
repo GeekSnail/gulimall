@@ -16,3 +16,6 @@ buildNumber.properties
 **/mvnw.cmd
 **/target/
 **/.gitignore
+**/resources/src/views/
+renren-generator/
+renren-fast-vue/
