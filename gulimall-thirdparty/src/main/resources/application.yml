@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    nacos:
+      server-addr: 192.168.56.10:8848
+    alicloud:
+      access-key: 
+      secret-key: 
+      oss:
+        bucket: 202304
+        endpoint: oss-cn-hongkong.aliyuncs.com
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml
+      - optional:nacos:${spring.application.name}.properties
+  application:
+    name: gulimall-thirdparty
+
+alicloud:
+  sms:
+    host: https://dfsns.market.alicloudapi.com
+    path: /data/send_sms
+    template-id: CST_ptdie100
+    appcode: 

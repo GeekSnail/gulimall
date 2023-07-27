@@ -11,6 +11,7 @@ package com.example.common.utils;
 import org.apache.http.HttpStatus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,7 +21,6 @@ import java.util.Map;
  */
 public class R extends HashMap<String, Object> {
 	private static final long serialVersionUID = 1L;
-	
 	public R() {
 		put("code", 0);
 		put("msg", "success");
@@ -61,4 +61,8 @@ public class R extends HashMap<String, Object> {
 		super.put(key, value);
 		return this;
 	}
+	public Integer getCode() {
+		return (Integer) get("code");
+	}
+	public String getMsg() { return (String) get("msg"); }
 }

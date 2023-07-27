@@ -1,14 +1,12 @@
 package com.example.gulimall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.example.gulimall.product.vo.SpuSaveVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.gulimall.product.entity.SpuInfoEntity;
 import com.example.gulimall.product.service.SpuInfoService;
@@ -30,17 +28,25 @@ public class SpuInfoController {
     @Autowired
     private SpuInfoService spuInfoService;
 
+    @PostMapping("/{id}/up")
+    public R spuUp(@PathVariable("id") Long id) {
+        boolean b = spuInfoService.up(id);
+        return b? R.ok(): R.error();
+    }
     /**
      * 列表
      */
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = spuInfoService.queryPage(params);
-
+//        PageUtils page = spuInfoService.queryPage(params);
+        PageUtils page = spuInfoService.queryPageByCondition(params);
         return R.ok().put("page", page);
     }
-
-
+    @GetMapping("/getBySkuIds")
+    public R getBySkuIds(@RequestParam("skuIds") List<Long> skuIds) {
+        Map<Long,Map<String,Object>> map = spuInfoService.getBySkuIds(skuIds);
+        return R.ok().put("data", map);
+    }
     /**
      * 信息
      */
@@ -55,9 +61,8 @@ public class SpuInfoController {
      * 保存
      */
     @RequestMapping("/save")
-    public R save(@RequestBody SpuInfoEntity spuInfo){
-		spuInfoService.save(spuInfo);
-
+    public R save(@RequestBody SpuSaveVo vo){
+		spuInfoService.saveSpuInfo(vo);
         return R.ok();
     }
 
@@ -80,5 +85,4 @@ public class SpuInfoController {
 
         return R.ok();
     }
-
 }

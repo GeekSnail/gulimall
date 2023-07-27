@@ -3,12 +3,14 @@ package com.example.gulimall.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.example.common.exception.BizCodeEnume;
+import com.example.gulimall.member.exception.MobileExistedException;
+import com.example.gulimall.member.exception.UsernameExistedException;
+import com.example.gulimall.member.feign.CouponFeignService;
+import com.example.gulimall.member.vo.LoginVo;
+import com.example.gulimall.member.vo.RegisterVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.gulimall.member.entity.MemberEntity;
 import com.example.gulimall.member.service.MemberService;
@@ -29,6 +31,49 @@ import com.example.common.utils.R;
 public class MemberController {
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    CouponFeignService couponFeignService;
+    //测试Feign
+    @RequestMapping("/coupons")
+    public R test() {
+        MemberEntity member = new MemberEntity();
+        member.setNickname("张三");
+        //调用远程服务
+        R r = couponFeignService.memberCoupons();
+        return R.ok().put("member", member).put("coupons", r.get("coupons"));
+    }
+
+    @PostMapping("/register")
+    public R register(@RequestBody RegisterVo vo) {
+        try {
+            memberService.register(vo);
+        } catch (MobileExistedException e) {
+            System.err.println(e);
+            return R.error(BizCodeEnume.MOBILE_EXISTED_EXCEPTION.getCode(), BizCodeEnume.MOBILE_EXISTED_EXCEPTION.getMsg());
+        } catch (UsernameExistedException e) {
+            System.err.println(e);
+            return R.error(BizCodeEnume.USER_EXISTED_EXCEPTION.getCode(), BizCodeEnume.USER_EXISTED_EXCEPTION.getMsg());
+        }
+        return R.ok();
+    }
+    @PostMapping("/login")
+    public R login(@RequestBody LoginVo vo) {
+        MemberEntity entity = memberService.login(vo);
+        if (entity != null) {
+            return R.ok().put("data", entity);
+        }
+        return R.error(BizCodeEnume.ACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(),
+                BizCodeEnume.ACCOUNT_PASSWORD_INVALID_EXCEPTION.getMsg());
+    }
+    @PostMapping("/sociallogin")
+    public R socialLogin(@RequestParam("token") String token, @RequestParam("type") String type) throws Exception {
+        MemberEntity entity = memberService.socialLogin(token, type);
+        if (entity != null) {
+            return R.ok().put("data", entity);
+        }
+        return R.error();
+    }
 
     /**
      * 列表

@@ -8,6 +8,13 @@
     <name>gulimall</name>
     <description>gulimall</description>
     <packaging>pom</packaging>
+    <properties>
+        <java.version>11</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.compilerVersion>11</maven.compiler.compilerVersion>
+    </properties>
     <modules>
         <module>gulimall-coupon</module>
         <module>gulimall-member</module>
@@ -16,5 +23,23 @@
         <module>gulimall-ware</module>
         <module>renren-fast</module>
         <module>gulimall-common</module>
+        <module>gulimall-gateway</module>
+        <module>gulimall-thirdparty</module>
+        <module>gulimall-search</module>
+        <module>gulimall-auth</module>
+        <module>gulimall-cart</module>
+        <module>gulimall-seckill</module>
     </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

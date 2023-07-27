@@ -13,6 +13,11 @@
         <result property="wareId" column="ware_id"/>
         <result property="lockStatus" column="lock_status"/>
     </resultMap>
+    <select id="listByOrderId" resultType="com.example.gulimall.ware.entity.WareOrderTaskDetailEntity">
+        select d.* from wms_ware_order_task t
+            join wms_ware_order_task_detail d on t.id=d.task_id
+        where order_id=#{orderId};
+    </select>
 
 
 </mapper>

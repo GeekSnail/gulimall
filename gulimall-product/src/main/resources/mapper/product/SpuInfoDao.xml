@@ -15,6 +15,16 @@
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
+    <update id="updateStatus">
+        update `pms_spu_info` set publish_status=#{value}, update_time=now() where id=#{id}
+    </update>
+    <select id="getBySkuIds" resultType="java.util.Map">
+--      select sku_id,p.* from pms_sku_info k join pms_spu_info p on k.spu_id=p.id where sku_id in(1,2);
+        select sku_id,p.id,spu_name,p.brand_id,p.catalog_id from pms_sku_info k join pms_spu_info p on k.spu_id=p.id where sku_id in
+        <foreach collection="skuIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>;
+    </select>
 
 
 </mapper>

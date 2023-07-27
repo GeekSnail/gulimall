@@ -3,6 +3,7 @@ package com.example.gulimall.order.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.utils.PageUtils;
 import com.example.gulimall.order.entity.PaymentInfoEntity;
+import com.example.gulimall.order.vo.PayAsyncVo;
 
 import java.util.Map;
 
@@ -16,5 +17,6 @@ import java.util.Map;
 public interface PaymentInfoService extends IService<PaymentInfoEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
 }
 

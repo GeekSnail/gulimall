@@ -1,14 +1,15 @@
 package com.example.gulimall.ware.controller;
 
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.example.common.exception.BizCodeEnume;
+import com.example.common.exception.NoStockException;
+import com.example.common.to.WareSkuLock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.gulimall.ware.entity.WareSkuEntity;
 import com.example.gulimall.ware.service.WareSkuService;
@@ -30,6 +31,23 @@ public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
 
+    //查询sku是否有库存
+    @PostMapping("hasstock")
+    public R hasStockBySkuIds(@RequestBody List<Long> skuIds) {
+        Map<Long, Boolean> map = wareSkuService.hasStockBySkuIds(skuIds);
+        return R.ok().put("data", map);
+    }
+    //锁定库存
+    @PostMapping("/lockstock")
+    public R lockStock(@RequestBody WareSkuLock wareSkuLock) {
+        try {
+            boolean lock = wareSkuService.lockStock(wareSkuLock);
+            return R.ok();
+        } catch (NoStockException e) {
+            System.err.println(e);
+            return R.error(BizCodeEnume.NO_STOCK_EXCEPTION.getCode(), BizCodeEnume.NO_STOCK_EXCEPTION.getMsg());
+        }
+    }
     /**
      * 列表
      */

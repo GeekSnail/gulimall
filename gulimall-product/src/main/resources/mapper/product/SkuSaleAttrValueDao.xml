@@ -12,6 +12,26 @@
         <result property="attrValue" column="attr_value"/>
         <result property="attrSort" column="attr_sort"/>
     </resultMap>
+    <!--分组后 相同属性聚合 2个记录->1个对象-->
+    <resultMap id="skuSaleAttrVo" type="com.example.gulimall.product.vo.SkuItemVo$SkuSaleAttrVo">
+        <result property="attrId" column="attr_id"></result>
+        <result property="attrName" column="attr_name"></result>
+        <collection property="attrValues" ofType="com.example.gulimall.product.vo.SkuItemVo$AttrValueSkuIds">
+            <result property="attrValue" column="attr_value"></result>
+            <result property="skuIds" column="sku_ids"></result>
+        </collection>
+    </resultMap>
+    <select id="getBySpuId" resultMap="skuSaleAttrVo">
+--         select attr_id, attr_name, group_concat(distinct attr_value) attr_values
+        select attr_id, attr_name, attr_value, group_concat(distinct si.sku_id) sku_ids
+        from pms_sku_info si
+            left join pms_sku_sale_attr_value ssa on si.sku_id=ssa.sku_id
+        where spu_id=#{spuId} group by attr_id, attr_name, attr_value;
+    </select>
+    <select id="attrNameValueAsStringList" resultType="java.lang.String">
+        select concat(attr_name, ":", attr_value) from pms_sku_sale_attr_value
+        where sku_id=#{skuId}
+    </select>
 
 
 </mapper>

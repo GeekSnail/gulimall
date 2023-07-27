@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +26,28 @@ import com.example.common.utils.R;
  * @email sunlightcs@gmail.com
  * @date 2023-03-28 02:10:55
  */
+@RefreshScope
 @RestController
 @RequestMapping("coupon/coupon")
 public class CouponController {
     @Autowired
     private CouponService couponService;
+
+    @RequestMapping("/member/list")
+    public R memberCoupons() {
+        CouponEntity coupon = new CouponEntity();
+        coupon.setCouponName("满100减10");
+        return R.ok().put("coupons", Arrays.asList(coupon));
+    }
+
+    @Value("${coupon.user.name}")
+    private String name;
+    @Value("${coupon.user.age}")
+    private int age;
+    @RequestMapping("/test-nacos-config")
+    public R testNacosConfig() {
+        return R.ok().put("name", name).put("age", age);
+    }
 
     /**
      * 列表

@@ -1,14 +1,15 @@
 package com.example.gulimall.ware.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import com.example.gulimall.ware.vo.AddrPairFare;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.gulimall.ware.entity.WareInfoEntity;
 import com.example.gulimall.ware.service.WareInfoService;
@@ -38,6 +39,15 @@ public class WareInfoController {
         PageUtils page = wareInfoService.queryPage(params);
 
         return R.ok().put("page", page);
+    }
+
+    @GetMapping("/fare")
+    public R fare(@RequestParam("addrId") Long addrId, @RequestParam("skuIds") List<Long> skuIds) throws ExecutionException, InterruptedException {
+//        boolean b = Pattern.matches("^(\\d+,?)+$", skuIds);
+        AddrPairFare vo = wareInfoService.getAddrPairAndFare(addrId, skuIds);
+        if (vo != null)
+            return R.ok().put("data", vo);
+        return R.error("查询出错");
     }
 
 

@@ -10,6 +10,14 @@
         <result property="address" column="address"/>
         <result property="areacode" column="areacode"/>
     </resultMap>
-
-
+    <select id="getWareBySkuIds" resultType="com.example.gulimall.ware.entity.WareInfoEntity">
+--      select b.* from wms_ware_sku a join wms_ware_info b on a.ware_id=b.id where sku_id in (1,2);
+--      select * from wms_ware_info where id in (select distinct ware_id from wms_ware_sku where sku_id in (1,2));
+        select id,name,address from wms_ware_info where id in (
+            select distinct ware_id from wms_ware_sku where sku_id in
+            <foreach collection="skuIds" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+        );
+    </select>
 </mapper>

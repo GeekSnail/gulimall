@@ -1,13 +1,56 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.56.10:3306/gulimall_wms?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://192.168.56.10:3306/gulimall_wms?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     username: root
     password: root
+  cloud:
+    nacos:
+      server-addr: 192.168.56.10:8848
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml
+      - optional:nacos:${spring.application.name}.properties
+  application:
+    name: gulimall-ware
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:
     db-config:
       id-type: auto
-server:
-  port: 10000
+
+logging:
+  level:
+    com.example.gulimall: debug
+    org.springframework.cloud.openfeign: debug
+    org.springframework.cloud.sleuth: debug
+
+seata:
+  enabled: false
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      cluster: default
+      group: SEATA_GROUP
+      namespace: febc0506-886e-4d28-931a-703500313ded
+      server-addr: 192.168.56.10:8848
+  config:
+    type: nacos
+    nacos:
+      data-id: seata.properties
+      group: SEATA_GROUP
+      namespace: febc0506-886e-4d28-931a-703500313ded
+      server-addr: 192.168.56.10:8848
+#  enable-auto-data-source-proxy: true
+#  tx-service-group: default_tx_group
+#  service:
+#    vgroup-mapping:
+#      default_tx_group: default
+#    grouplist:
+#      default: 127.0.0.1:8091
+#  client:
+#  transport:

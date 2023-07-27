@@ -1,14 +1,15 @@
 package com.example.gulimall.product.controller;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.gulimall.product.entity.SkuInfoEntity;
 import com.example.gulimall.product.service.SkuInfoService;
@@ -34,21 +35,36 @@ public class SkuInfoController {
      * 列表
      */
     @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = skuInfoService.queryPage(params);
+    public R page(@RequestParam Map<String, Object> params) {
+//        PageUtils page = skuInfoService.queryPage(params);
+        PageUtils page = skuInfoService.queryPageByCondition(params);
 
         return R.ok().put("page", page);
     }
 
-
+    @RequestMapping("/listby")
+    public R list(@RequestParam("skuId") List<Long> skuIds) {
+        List<SkuInfoEntity> entities = skuInfoService.listByIds(skuIds);
+        return R.ok().put("data", entities);
+    }
     /**
      * 信息
      */
     @RequestMapping("/info/{skuId}")
-    public R info(@PathVariable("skuId") Long skuId){
+    public R info(@PathVariable("skuId") Long skuId) {
 		SkuInfoEntity skuInfo = skuInfoService.getById(skuId);
 
         return R.ok().put("skuInfo", skuInfo);
+    }
+
+    @GetMapping("/price")
+    public Map<Long,BigDecimal> getPriceByIds(@RequestParam("skuIds") List<Long> skuIds) {
+//        boolean b = Pattern.matches("^(\\d+,?)+$", skuIds);
+        List<SkuInfoEntity> entities = skuInfoService.list(new QueryWrapper<SkuInfoEntity>().in("sku_id", skuIds));
+        if (entities!=null && entities.size() > 0) {
+            return entities.stream().collect(Collectors.toMap(e->e.getSkuId(), e->e.getPrice()));
+        }
+        return null;
     }
 
     /**

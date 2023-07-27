@@ -19,3 +19,5 @@ buildNumber.properties
 **/resources/src/views/
 renren-generator/
 renren-fast-vue/
+*.local
+html.tar.gz

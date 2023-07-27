@@ -13,5 +13,30 @@
         <result property="stockLocked" column="stock_locked"/>
     </resultMap>
 
-
+    <update id="addStock">
+        update `wms_ware_sku` set stock=stock+#{skuNum}
+        where sku_id=#{skuId} and ware_id=#{wareId}
+    </update>
+    <select id="getStockBySkuIds" resultType="java.util.Map">
+--         select sku_id, sum(stock-stock_locked) from wms_ware_sku where sku_id in (1,2) group by sku_id;
+        select sku_id, sum(stock-stock_locked) net_stock from wms_ware_sku where sku_id in
+        <foreach collection="skuIds" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        group by sku_id;
+    </select>
+    <update id="tryLockStock" parameterType="com.example.gulimall.ware.vo.UpdateStockLockedVo">
+<!--         update wms_ware_sku set stock_locked=stock_locked+#{count} where sku_id=#{skuId} and stock-stock_locked>=#{count} limit 1;update wms_ware_sku set stock_locked=stock_locked+#{count} where sku_id=#{skuId} and stock-stock_locked>=#{count} limit 1;-->
+        set @ware_id:=0;
+        update wms_ware_sku
+        set stock_locked = stock_locked + #{count} and (select @ware_id:=ware_id)
+        where sku_id=#{skuId} and stock - stock_locked >= #{count} limit 1;
+        <selectKey keyProperty="wareId" resultType="long" order="AFTER">
+            select @ware_id;
+        </selectKey>
+    </update>
+    <update id="unlockStock">
+        update wms_ware_sku set stock_locked = stock_locked - #{skuNum}
+        where sku_id=#{skuId} and ware_id=#{wareId} and stock_locked >= #{skuNum};
+    </update>
 </mapper>

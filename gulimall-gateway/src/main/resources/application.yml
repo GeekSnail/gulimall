@@ -1,0 +1,80 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+#        - id: bing_route
+#          uri: https://www.bing.com
+#          predicates:
+#            - Query=q,bing
+
+          # localhost:88/api/product/category/list/tree -> localhost:10000/product/category/list/tree
+        - id: product_route
+          # loadbalance
+          uri: lb://gulimall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: member_route
+          # loadbalance
+          uri: lb://gulimall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: ware_route
+          # loadbalance
+          uri: lb://gulimall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        - id: coupon_route
+          uri: lb://gulimall-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+          # localhost:88/api/thirdparty/oss/policy -> localhost:30000/oss/policy
+        - id: thirdpary_route
+          # loadbalance
+          uri: lb://gulimall-thirdparty
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
+
+          # localhost:88/api/captcha.jpg -> localhost:8080/renren-fast/captcha.jpg
+        - id: admin_route
+          # loadbalance
+          uri: lb://renren-fast
+          predicates:
+            - Path=/api/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+
+        - id: client_home_route
+          uri: lb://gulimall-product
+          predicates:
+            - Host=gulimall.com, item.gulimall.com
+        - id: client_search_route
+          uri: lb://gulimall-search
+          predicates:
+            - Host=search.gulimall.com
+        - id: client_auth_route
+          uri: lb://gulimall-auth
+          predicates:
+            - Host=auth.gulimall.com
+        - id: client_cart_route
+          uri: lb://gulimall-cart
+          predicates:
+            - Host=cart.gulimall.com
+        - id: client_order_route
+          uri: lb://gulimall-order
+          predicates:
+            - Host=order.gulimall.com
+        - id: client_seckill_route
+          uri: lb://gulimall-seckill
+          predicates:
+            - Host=seckill.gulimall.com

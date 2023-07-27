@@ -3,8 +3,11 @@ package com.example.gulimall.ware.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.utils.PageUtils;
 import com.example.gulimall.ware.entity.WareInfoEntity;
+import com.example.gulimall.ware.vo.AddrPairFare;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 仓库信息
@@ -16,5 +19,7 @@ import java.util.Map;
 public interface WareInfoService extends IService<WareInfoEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    AddrPairFare getAddrPairAndFare(Long addrId, List<Long> skuIds) throws ExecutionException, InterruptedException;
 }
 

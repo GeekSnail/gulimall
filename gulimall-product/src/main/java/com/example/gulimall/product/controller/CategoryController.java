@@ -1,6 +1,7 @@
 package com.example.gulimall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,15 @@ public class CategoryController {
         return R.ok().put("page", page);
     }
 
+    /**
+     * 所有分类及其子分类 属性结构组装
+     */
+    @RequestMapping("/list/tree")
+    public R listTree(){
+        List<CategoryEntity> entities = categoryService.listWithTree();
+        return R.ok().put("data", entities);
+    }
+
 
     /**
      * 信息
@@ -66,7 +76,18 @@ public class CategoryController {
      */
     @RequestMapping("/update")
     public R update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+//		categoryService.updateById(category);
+		categoryService.updateDetail(category);
+
+        return R.ok();
+    }
+
+    /**
+     * 批量更新
+     */
+    @RequestMapping("/update/batch")
+    public R batchUpdate(@RequestBody CategoryEntity[] categoryArray){
+        categoryService.updateBatchById(Arrays.asList(categoryArray));
 
         return R.ok();
     }
@@ -76,8 +97,8 @@ public class CategoryController {
      */
     @RequestMapping("/delete")
     public R delete(@RequestBody Long[] catIds){
-		categoryService.removeByIds(Arrays.asList(catIds));
-
+//		categoryService.removeByIds(Arrays.asList(catIds));
+        categoryService.removeCatByIds(Arrays.asList(catIds));
         return R.ok();
     }
 

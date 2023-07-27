@@ -1,0 +1,94 @@
+pipeline {
+  agent {
+    node {
+      label 'maven && jdk11'
+    }
+  }
+  environment {
+    DOCKER_CREDENTIAL_ID = 'aliyun-id'
+    REGISTRY = 'registry.cn-hangzhou.aliyuncs.com'
+    DOCKERHUB_NAMESPACE = 'geeksnail'
+    GIT_CREDENTIAL_ID = 'github-id'
+    GIT_URL = 'https://github.com/geeksnail/gulimall.git'
+    GIT_BRANCH = 'main'
+    KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
+    MODULES = 'gulimall-auth,gulimall-cart,gulimall-gateway,gulimall-member,gulimall-product,gulimall-search,gulimall-ware,gulimall-order,gulimall-coupon,gulimall-seckill,gulimall-thirdparty,renren-fast'
+  }
+  parameters {
+    string(name: 'TAG_NAME', defaultValue: '0.1', description: '')
+  }
+  stages {
+    stage('clone code') {
+      when {
+        expression {params.TAG_NAME}
+      }
+      agent none
+      steps {
+        //sh 'echo $GIT_CREDENTIAL_ID $GIT_URL $TAG_NAME'
+        git credentialsId: env.GIT_CREDENTIAL_ID, url: env.GIT_URL, branch: env.GIT_BRANCH, changelog: true, poll: false
+      }
+    }
+    stage('build & push') {
+      steps {
+        container('maven') {
+          sh 'mvn -DskipTests -gs `pwd`/settings.xml package'
+          withCredentials([usernamePassword(passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME', credentialsId: "$DOCKER_CREDENTIAL_ID")]) {
+            sh 'echo "$DOCKER_PASSWORD" | docker login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin'
+            script {
+              def build = [:]
+              env.MODULES.tokenize(",").each{ APP_NAME ->
+                build[APP_NAME] = {
+                  //echo "$APP_NAME"
+                  sh """
+                  docker build -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-SNAPSHOT-$BUILD_NUMBER ./$APP_NAME
+                  docker push  $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-SNAPSHOT-$BUILD_NUMBER
+                  """
+                }
+              }
+              parallel build
+            }
+          }
+        }
+      }
+    }
+    stage('deploy to dev') {
+      steps {
+        container('maven') {
+          //input(id: 'deploy-to-dev', message: 'deploy to dev?')
+          withCredentials([kubeconfigFile(credentialsId: env.KUBECONFIG_CREDENTIAL_ID, variable: 'KUBECONFIG')]) {
+            script {
+              def deploy = [:]
+              env.MODULES.tokenize(",").each{ APP_NAME ->
+                deploy[APP_NAME] = {
+                  sh """
+                  kubectl delete deploy -n gulimall $APP_NAME --force
+                  envsubst < $APP_NAME/deploy-dev.yaml | kubectl apply -f -
+                  """
+                }
+              }
+              parallel deploy
+            }
+          }
+        }
+      }
+    }
+    stage('parallel push') {
+      steps {
+        container('maven') {
+          script {
+            def push = [:]
+            env.MODULES.tokenize(",").each{ APP_NAME ->
+              push[APP_NAME] = {
+                sh """
+                docker tag  $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-SNAPSHOT-$BUILD_NUMBER $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME
+                docker push  $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME
+                """
+              }
+            }
+            parallel push
+          }
+        }
+      }
+    }
+  }
+}

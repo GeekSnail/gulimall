@@ -12,6 +12,21 @@
         <result property="icon" column="icon"/>
         <result property="catelogId" column="catelog_id"/>
     </resultMap>
+    <!--返回的type里有嵌套类型就需在此定义-->
+    <resultMap id="spuAttrGroupVo" type="com.example.gulimall.product.vo.SkuItemVo$SpuAttrGroupVo">
+        <result property="groupName" column="attr_group_name"></result>
+        <collection property="attrs" ofType="com.example.gulimall.product.vo.SkuItemVo$SpuBaseAttrVo">
+            <result property="attrName" column="attr_name"></result>
+            <result property="attrValue" column="attr_value"></result>
+        </collection>
+    </resultMap>
+    <select id="getAttrGroupWithAttrsBySpuId" resultMap="spuAttrGroupVo">
+        select ag.attr_group_id, attr_group_name, aar.attr_id, pav.attr_name, pav.attr_value
+        from pms_attr_group ag
+            left join pms_attr_attrgroup_relation aar on aar.attr_group_id=ag.attr_group_id
+            left join pms_product_attr_value pav on aar.attr_id=pav.attr_id
+        where catelog_id=#{catalogId} and spu_id=#{spuId};
+    </select>
 
 
 </mapper>
